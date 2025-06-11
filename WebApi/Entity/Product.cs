@@ -8,7 +8,6 @@ namespace WebApi.Entity
     {
         public int Id { get; set; }
         public int? CategoryId { get; set; }
-        [JsonIgnore]
         public Category? Category { get; set; }
 
         [Required]

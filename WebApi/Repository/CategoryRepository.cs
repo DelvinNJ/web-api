@@ -11,19 +11,26 @@ namespace WebApi.Repository
         private readonly ApplicationDbContext _dbContext = context;
 
         public async Task<PagedResult<Category>> GetCategories(int page,
-                                                               int pageSize,
-                                                               string sortBy,
-                                                               string sortOrder,
-                                                               string? include = null)
+                                                       int pageSize,
+                                                       string sortBy,
+                                                       string sortOrder,
+                                                       string? include = null,
+                                                       string? search = null)
         {
-
             IQueryable<Category> query = _dbContext.Categories;
 
-            string[] allowedIncludes = {"Products", "Products.Variants"};
-            query = query.ApplyIncludes(include, allowedIncludes);
+            var allowedIncludes = new[] { "Products" };
+            query = query.ApplyIncludes(allowedIncludes, include);
 
-            return await query
-                .GetQueryAsync(page, pageSize, sortBy, sortOrder);
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                string[] fields = { "Name", "Description" };
+                query = query.ApplySearch(search, fields);
+            }
+
+            query = query.ApplySorting(sortBy, sortOrder);
+
+            return await query.ToPagedResultAsync(page, pageSize);
         }
     }
 }

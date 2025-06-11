@@ -16,7 +16,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IDonorRepository, DonorRepository>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();    
+//builder.Services.AddScoped<IProductRepository, ProductRepository>();    
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 builder.Services.AddDbContext<ApplicationDbContext>(context =>

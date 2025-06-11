@@ -22,28 +22,31 @@ namespace WebApi.Controllers
             _productRepository = productRepository;
             _mapper = mapper;
         }
-        [HttpGet]
-        public async Task<IActionResult> GetProducts([FromQuery] int page = 1,
-                                                     [FromQuery] int pageSize = 10,
-                                                     [FromQuery] string sortBy = "Name",
-                                                     [FromQuery] string sortOrder = "desc",
-                                                     [FromQuery] string? include = null)
-        {
-            var result = await _productRepository.GetProducts(page,
-                                                              pageSize,
-                                                              sortBy,
-                                                              sortOrder, 
-                                                              include);
+        //[HttpGet]
+        //public async Task<IActionResult> GetProducts([FromQuery] int page = 1,
+        //                                             [FromQuery] int pageSize = 10,
+        //                                             [FromQuery] string sortBy = "Name",
+        //                                             [FromQuery] string sortOrder = "desc",
+        //                                             [FromQuery] string? include = null)
+        //{
+        //    string?[] allowedIncludes = new[] { "Category" };
 
-            var pagedResult = new PagedResult<ProductDto>
-            {
-                PageNumber = result.PageNumber,
-                PageSize = result.PageSize,
-                TotalCount = result.TotalCount,
-                Items = _mapper.Map<List<ProductDto>>(result.Items)
-            };
+        //    var result = await _productRepository.GetProducts(page,
+        //                                                      pageSize,
+        //                                                      sortBy,
+        //                                                      sortOrder,
+        //                                                      allowedIncludes,
+        //                                                      include);
 
-            return Ok(pagedResult);
-        }
+        //    var pagedResult = new PagedResult<ProductDto>
+        //    {
+        //        PageNumber = result.PageNumber,
+        //        PageSize = result.PageSize,
+        //        TotalCount = result.TotalCount,
+        //        Items = _mapper.Map<List<ProductDto>>(result.Items)
+        //    };
+
+        //    return Ok(pagedResult);
+        //}
     }
 }

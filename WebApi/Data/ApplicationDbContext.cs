@@ -7,6 +7,7 @@ namespace WebApi.Data
     {
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
+
         }
 
         public DbSet<Donor> Donors { get; set; }  

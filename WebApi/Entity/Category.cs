@@ -10,7 +10,6 @@ namespace WebApi.Entity
         public string? Description { get; set; }
         public bool IsActive { get; set; } = true;
         public bool IsDeleted { get; set; } = false;
-        [JsonIgnore]
-        public ICollection<Product> Products { get; set; } = new List<Product>();
+        public ICollection<Product>? Products { get; set; }
     }
 }

@@ -9,6 +9,7 @@ namespace WebApi.Interface
                                                   int pageSize,
                                                   string sortBy,
                                                   string sortOrder,
-                                                  string? include = null);
+                                                  string? include = null,
+                                                  string? search = null);
     }
 }

@@ -7,6 +7,11 @@ namespace WebApi.Interface
 {
     public interface IProductRepository
     {
-        Task<PagedResult<Product>> GetProducts(int page, int pageSize, string sortBy, string sortOrder, string? include = null);
+        Task<PagedResult<Product>> GetProducts(int page,
+                                               int pageSize,
+                                               string sortBy,
+                                               string sortOrder,
+                                               string?[] allowedIncludes,
+                                               string? include = null);
     }
 }

@@ -1,72 +1,135 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WebApi.Service
 {
     public static class IQueryableExtensions
     {
-        //relationship
-        public static IQueryable<TEntity> ApplyIncludes<TEntity>(this IQueryable<TEntity> query,
-                                                              string? include,
-                                                              string?[] allowedIncludes)
-        where TEntity : class
+        public static IQueryable<TEntity> ApplyIncludes<TEntity>(
+            this IQueryable<TEntity> query,
+            string[] allowedIncludes,
+            string? include)
+            where TEntity : class
         {
-            if (string.IsNullOrWhiteSpace(include))
-                return query;
+            if (string.IsNullOrWhiteSpace(include)) return query;
 
-            var includeFields = include.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var includes = include.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                  .Select(i => i.Trim())
+                                  .Where(i => allowedIncludes.Contains(i));
 
-            foreach (var includeField in includeFields)
+            foreach (var inc in includes)
             {
-                query = query.Include(includeField.Trim());
+                query = query.Include(inc);
             }
+
             return query;
         }
-        public static async Task<PagedResult<T>> GetQueryAsync<T>(this IQueryable<T> query,
-                                                                  int page,
-                                                                  int pageSize,
-                                                                  string sortBy,
-                                                                  string sortOrder)
+        //Complete the logic
+        public static IQueryable<TEntity> ApplyFilters<TEntity>(this IQueryable<TEntity> query,
+                                                                string[] allowedFilters,
+                                                                string? filter)
+        where TEntity : class
         {
-            var result = new PagedResult<T>
+
+            return query;
+        }
+
+
+        public static IQueryable<T> ApplySearch<T>(
+            this IQueryable<T> query,
+            string search,
+            string[] fields)
+        {
+            if (string.IsNullOrWhiteSpace(search) || fields == null || fields.Length == 0)
+                return query;
+
+            var parameter = Expression.Parameter(typeof(T), "x");
+            var toLower = typeof(string).GetMethod(nameof(string.ToLower), Type.EmptyTypes)!;
+            var contains = typeof(string).GetMethod(nameof(string.Contains), new[] { typeof(string) })!;
+            var searchLower = Expression.Constant(search.ToLower());
+
+            Expression? predicate = null;
+
+            foreach (var field in fields)
             {
-                PageNumber = page,
-                PageSize = pageSize,
-                TotalCount = await query.CountAsync()
-            };
+                Expression containsExpression;
 
-            var sortFields = sortBy.Split(',', StringSplitOptions.RemoveEmptyEntries);
-            var sortOrders = sortOrder?.Split(',', StringSplitOptions.RemoveEmptyEntries);
-
-            //sorting
-            IOrderedQueryable<T>? orderedQuery = null;
-            for (int i = 0; i < sortFields.Length; i++)
-            {
-                var field = sortFields[i].Trim();
-                var descending = sortOrders != null && i < sortOrders.Length && sortOrders[i].ToLower() == "desc";
-
-                if (i == 0)
+                if (field == "FullName")
                 {
-                    orderedQuery = descending
-                        ? query.OrderByDescending(e => e != null ? EF.Property<object>(e, field) : null)
-                        : query.OrderBy(e => e != null ? EF.Property<object>(e, field) : null);
+                    var firstName = Expression.Property(parameter, "FirstName");
+                    var lastName = Expression.Property(parameter, "LastName");
+                    var space = Expression.Constant(" ");
+                    var fullName = Expression.Call(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string), typeof(string) })!, firstName, space, lastName);
+                    var fullNameToLower = Expression.Call(fullName, toLower);
+                    containsExpression = Expression.Call(fullNameToLower, contains, searchLower);
                 }
                 else
                 {
-                    orderedQuery = descending
-                        ? orderedQuery?.ThenByDescending(e => e != null ? EF.Property<object>(e, field) : null)
-                        : orderedQuery?.ThenBy(e => e!= null ? EF.Property<object>(e, field) : null);
+                    var property = Expression.Property(parameter, field);
+                    var toLowerCall = Expression.Call(property, toLower);
+                    containsExpression = Expression.Call(toLowerCall, contains, searchLower);
+                }
+
+                predicate = predicate == null ? containsExpression : Expression.OrElse(predicate, containsExpression);
+            }
+
+            var lambda = Expression.Lambda<Func<T, bool>>(predicate!, parameter);
+            return query.Where(lambda);
+        }
+
+        public static IQueryable<T> ApplySorting<T>(
+            this IQueryable<T> query,
+            string sortBy,
+            string? sortOrder)
+        {
+            var sortFields = sortBy.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var sortOrders = (sortOrder ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+            IOrderedQueryable<T>? orderedQuery = null;
+
+            for (int i = 0; i < sortFields.Length; i++)
+            {
+                var field = sortFields[i].Trim();
+                var isDescending = sortOrders.Length > i && sortOrders[i].Trim().Equals("desc", StringComparison.OrdinalIgnoreCase);
+
+                if (i == 0)
+                {
+                    orderedQuery = isDescending
+                        ? query.OrderByDescending(e => EF.Property<object>(e, field))
+                        : query.OrderBy(e => EF.Property<object>(e, field));
+                }
+                else
+                {
+                    orderedQuery = isDescending
+                        ? orderedQuery!.ThenByDescending(e => EF.Property<object>(e, field))
+                        : orderedQuery!.ThenBy(e => EF.Property<object>(e, field));
                 }
             }
 
-            var sortQuery =  orderedQuery ?? query;
+            return orderedQuery ?? query;
+        }
 
-            // pagination 
-            result.Items = await sortQuery
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+        public static async Task<PagedResult<T>> ToPagedResultAsync<T>(
+            this IQueryable<T> query,
+            int page,
+            int pageSize)
+        {
+            var total = await query.CountAsync();
+            var items = await query.Skip((page - 1) * pageSize)
+                                   .Take(pageSize)
+                                   .ToListAsync();
 
-            return result;
+            return new PagedResult<T>
+            {
+                PageNumber = page,
+                PageSize = pageSize,
+                TotalCount = total,
+                Items = items
+            };
         }
     }
 }
