@@ -128,7 +128,7 @@ namespace WebApi.Service
                 PageNumber = page,
                 PageSize = pageSize,
                 TotalCount = total,
-                Items = items
+                Data = items
             };
         }
     }

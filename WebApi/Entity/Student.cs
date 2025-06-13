@@ -1,13 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using WebApi.Models;
 
 namespace WebApi.Entity
 {
     public class Student
     {
+        [Key]
         public int Id { get; set; }
+        [Required]
+        [MaxLength(50)]
         public string? Name { get; set; }
-        public ICollection<StudentCourse> StudentCourses { get; set; } = null!;
+        [Range(0, 120)]
+        public int Age { get; set; }
+        public string? address { get; set; }
     }
 }

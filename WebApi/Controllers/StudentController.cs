@@ -1,48 +1,46 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Data;
 using WebApi.Entity;
+using WebApi.Interface;
+using WebApi.Mapper;
 using WebApi.Models;
+using WebApi.Service;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace WebApi.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class StudentController : ControllerBase
-    {
-        private readonly ApplicationDbContext _context;
+    public class StudentController: ControllerBase {
         private readonly IMapper _mapper;
+        private readonly IStudentRepository _studentRepository;
 
-        public StudentController(ApplicationDbContext context, IMapper mapper)
+        public StudentController(IMapper mapper, IStudentRepository studentRepository)
         {
-            _context = context;
             _mapper = mapper;
+            _studentRepository = studentRepository;
         }
-        [HttpGet]
-        public IActionResult Get()
+        [HttpGet("api/students")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+
+        public async Task<ActionResult<PagedResult<StudentDto>>> GetStudentsAsync(int pageNumber = 1, int pageSize = 10)
         {
-            var students = _context.Students
-            .Include(s => s.StudentCourses)
-                .ThenInclude(sc => sc.Course)
-            .ToList();
+            if(pageNumber < 1 || pageSize < 1)
+            {
+                return BadRequest("Page number must be greater than 0.");
+            }
 
-            var studentDtos = _mapper.Map<List<StudentDto>>(students);
-            return Ok(studentDtos);
-        }
-
-        [HttpGet("courses-with-students")]
-        public async Task<ActionResult<IEnumerable<CourseWithStudentsDto>>> GetCoursesWithStudents()
-        {
-            var courses = await _context.Courses
-                .Include(c => c.StudentCourses)
-                    .ThenInclude(sc => sc.Student)
-                .ToListAsync();
-
-            var courseDtos = _mapper.Map<List<CourseWithStudentsDto>>(courses);
-            return Ok(courseDtos);
+            var pagedResult = await _studentRepository.GetStudentsAsync(pageNumber, pageSize);
+            return Ok(new PagedResult<StudentDto>
+            {
+                PageNumber = pagedResult.PageNumber,
+                PageSize = pagedResult.PageSize,
+                TotalCount = pagedResult.TotalCount,
+                Data = _mapper.Map<List<StudentDto>>(pagedResult.Data)
+            });
         }
     }
 }
