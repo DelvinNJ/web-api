@@ -57,23 +57,9 @@ namespace WebApi.Service
             foreach (var field in fields)
             {
                 Expression containsExpression;
-
-                if (field == "FullName")
-                {
-                    var firstName = Expression.Property(parameter, "FirstName");
-                    var lastName = Expression.Property(parameter, "LastName");
-                    var space = Expression.Constant(" ");
-                    var fullName = Expression.Call(typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string), typeof(string) })!, firstName, space, lastName);
-                    var fullNameToLower = Expression.Call(fullName, toLower);
-                    containsExpression = Expression.Call(fullNameToLower, contains, searchLower);
-                }
-                else
-                {
-                    var property = Expression.Property(parameter, field);
-                    var toLowerCall = Expression.Call(property, toLower);
-                    containsExpression = Expression.Call(toLowerCall, contains, searchLower);
-                }
-
+                var property = Expression.Property(parameter, field);
+                var toLowerCall = Expression.Call(property, toLower);
+                containsExpression = Expression.Call(toLowerCall, contains, searchLower);
                 predicate = predicate == null ? containsExpression : Expression.OrElse(predicate, containsExpression);
             }
 

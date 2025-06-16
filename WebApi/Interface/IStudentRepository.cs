@@ -8,10 +8,11 @@ namespace WebApi.Interface
     {
        Task<PagedResult<Student>> GetStudentsAsync(
            int pageNumber, 
-           int pageSize, 
-           string? include = null,
-           string? filter = null, 
-           string? search = null);
+           int pageSize);
+        Task<Student?> GetStudentByIdAsync(int id);
+        Task<Student?> DeleteStudentByIdAsync(int id);
+        Task<Student?> CreateStudentAsync(Student student);
+        Task<Student> UpdateStudentAsync(Student student);
 
     }
 }

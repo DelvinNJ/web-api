@@ -20,15 +20,45 @@ namespace WebApi.Repository
         }
 
         public async Task<PagedResult<Student>> GetStudentsAsync(
-            int pageNumber, 
-            int pageSize, 
-            string? include = null,
-            string? filter = null, 
-            string? search = null)
+            int pageNumber,
+            int pageSize)
         {
             IQueryable<Student> query = _dbContext.Students;
 
             return await query.ToPagedResultAsync(pageNumber, pageSize);
+        }
+
+       public async Task<Student?> GetStudentByIdAsync(int id)
+       {
+            return await _dbContext.Students.FindAsync(id);
+       }
+
+        public async Task<Student?> CreateStudentAsync(Student student)
+        {
+            if (student == null)
+            {
+                throw new ArgumentNullException(nameof(student), "Student cannot be null.");
+            }
+            _dbContext.Students.Add(student);
+            await _dbContext.SaveChangesAsync();
+            return student;
+        }
+        public async Task<Student> UpdateStudentAsync(Student student)
+        {
+            _dbContext.Students.Update(student); 
+            await _dbContext.SaveChangesAsync();
+            return student;
+        }
+        public async Task<Student?> DeleteStudentByIdAsync(int id)
+        {
+            var student = await _dbContext.Students.FindAsync(id);
+            if (student == null)
+            {
+                return null;
+            }
+            _dbContext.Students.Remove(student);
+            await _dbContext.SaveChangesAsync();
+            return student;
         }
     }
 
