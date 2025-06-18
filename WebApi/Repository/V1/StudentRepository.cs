@@ -2,13 +2,12 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using WebApi.Data;
-using WebApi.Entity;
-using WebApi.Interface;
-using WebApi.Models;
+using WebApi.DbContexts;
+using WebApi.Entities;
+using WebApi.Interface.V1;
 using WebApi.Service;
 
-namespace WebApi.Repository
+namespace WebApi.Repository.V1
 {
     public class StudentRepository : IStudentRepository
     {
@@ -23,7 +22,9 @@ namespace WebApi.Repository
             int pageNumber,
             int pageSize)
         {
-            IQueryable<Student> query = _dbContext.Students;
+            IQueryable<Student> query = _dbContext.Students
+                    .Include(s => s.StudentCourses)
+                     .ThenInclude(sc => sc.Course);
 
             return await query.ToPagedResultAsync(pageNumber, pageSize);
         }
@@ -35,10 +36,6 @@ namespace WebApi.Repository
 
         public async Task<Student?> CreateStudentAsync(Student student)
         {
-            if (student == null)
-            {
-                throw new ArgumentNullException(nameof(student), "Student cannot be null.");
-            }
             _dbContext.Students.Add(student);
             await _dbContext.SaveChangesAsync();
             return student;

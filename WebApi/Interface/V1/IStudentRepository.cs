@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using WebApi.Entity;
+using WebApi.Entities;
 using WebApi.Service;
 
-namespace WebApi.Interface
+namespace WebApi.Interface.V1
 {
     public interface IStudentRepository
     {
