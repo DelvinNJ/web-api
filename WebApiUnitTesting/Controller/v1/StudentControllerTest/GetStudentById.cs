@@ -11,7 +11,7 @@ using WebApi.Entities;
 using WebApi.Interface.V1;
 using WebApi.Models.V1;
 
-namespace WebApiUnitTesting.V1.Controller.StudentControllerTest
+namespace WebApiUnitTesting.Controller.V1.StudentControllerTest
 {
     public class GetStudentById
     {

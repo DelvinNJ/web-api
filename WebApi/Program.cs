@@ -43,7 +43,7 @@ builder.Services.AddApiVersioning(option =>
 
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
-builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddDbContext<ApplicationDbContext>(context =>
     context.UseSqlServer(builder.Configuration.GetConnectionString("Database")));

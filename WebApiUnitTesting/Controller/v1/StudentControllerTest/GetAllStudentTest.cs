@@ -12,7 +12,7 @@ using WebApi.Interface.V1;
 using WebApi.Models.V1;
 using WebApi.Service;
 
-namespace WebApiUnitTesting.V1.Controller.StudentControllerTest
+namespace WebApiUnitTesting.Controller.V1.StudentControllerTest
 {
     public class GetAllStudentTest
     {
@@ -27,12 +27,15 @@ namespace WebApiUnitTesting.V1.Controller.StudentControllerTest
             _controller = new StudentController(_mockMapper.Object, _mockRepo.Object);
         }
 
-        [Fact]
-        public async Task GetStudentsAsync_ReturnsBadRequest_WhenPageNumberOrPageSizeIsInvalid()
+        [Theory]
+        [InlineData(0, 0)]  // both invalid
+        [InlineData(0, 1)]  // pageNumber invalid
+        [InlineData(1, 0)]  // pageSize invalid
+        [InlineData(-1, -1)] // Negative
+        public async Task GetStudentsAsync_ReturnsBadRequest_WhenPageNumberOrPageSizeIsInvalid(int invalidPageNumber, int invalidPageSize)
         {
 
-            int invalidPageNumber = 0;
-            int invalidPageSize = 0;
+            
             // Act
             var result = await _controller.GetStudentsAsync(invalidPageNumber, invalidPageSize);
             // Assert
