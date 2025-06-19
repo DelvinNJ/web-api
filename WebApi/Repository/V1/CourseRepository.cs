@@ -15,8 +15,8 @@ namespace WebApi.Repository.V1
         public async Task<PagedResult<Course>> GetAllCoursesAsync(int pageNumber, int pageSize)
         {
             IQueryable<Course> query = _dbContext.Courses
-                                         .Include(s => s.StudentCourses)
-                                        .ThenInclude(sc => sc.Student);
+                                            .Include(s => s.StudentCourses!)
+                                            .ThenInclude(sc => sc.Student!);
 
             return await query.ToPagedResultAsync(pageNumber, pageSize);
         }

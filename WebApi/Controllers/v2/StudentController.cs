@@ -10,7 +10,7 @@ using WebApi.Mapper;
 using WebApi.Models.V1;
 using WebApi.Service;
 
-namespace WebApi.Controllers.v2
+namespace WebApi.Controllers.V2
 {
     [ApiController]
     [Route("api/v{version:apiVersion}/student/")]

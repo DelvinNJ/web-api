@@ -12,3 +12,17 @@
     - FakeItEasy
     - Moq
 ```
+
+# Api version
+
+- Install packages
+``` 
+    - Asp.Versioning.Mvc
+    - Asp.Versioning.Mvc.ApiExplorer
+```
+- Setup the code
+```
+- Add builder.Services.AddApiVersioning
+- Add builder.Services.AddTransient
+- Update app.UseSwaggerUI 
+```

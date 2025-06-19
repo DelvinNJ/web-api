@@ -7,7 +7,7 @@ using WebApi.Interface.V1;
 using WebApi.Models.V1;
 using WebApi.Service;
 
-namespace WebApi.Controllers.v1
+namespace WebApi.Controllers.V1
 {
     [ApiController]
     [Route("api/v{version:apiVersion}/course/")]

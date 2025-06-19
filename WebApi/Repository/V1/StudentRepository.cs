@@ -23,8 +23,8 @@ namespace WebApi.Repository.V1
             int pageSize)
         {
             IQueryable<Student> query = _dbContext.Students
-                    .Include(s => s.StudentCourses)
-                     .ThenInclude(sc => sc.Course);
+                                            .Include(s => s.StudentCourses!)
+                                            .ThenInclude(sc => sc.Course!);
 
             return await query.ToPagedResultAsync(pageNumber, pageSize);
         }

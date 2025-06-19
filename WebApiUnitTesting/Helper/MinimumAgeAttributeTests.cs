@@ -11,7 +11,7 @@ namespace WebApiUnitTesting.Helper
     public class MinimumAgeAttributeTests
     {
         [Theory]
-        [   ("2000-01-01", 18, true)]  // Age > 18, valid
+        [InlineData("2000-01-01", 18, true)]  // Age > 18, valid
         [InlineData("2025-01-01", 18, false)] // Age < 18, invalid
         [InlineData(null, 18, true)]          // Null value, valid (depends on your logic)
         public void IsValid_ReturnsExpectedResult(string dateString, int minAge, bool expectedIsValid)
